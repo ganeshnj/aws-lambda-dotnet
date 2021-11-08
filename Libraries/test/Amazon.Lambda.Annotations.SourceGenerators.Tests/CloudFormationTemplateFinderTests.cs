@@ -2,20 +2,23 @@ using System;
 using System.IO;
 using System.Linq;
 using Amazon.Lambda.Annotations.SourceGenerator;
+using Amazon.Lambda.Annotations.SourceGenerator.Diagnostics;
 using Amazon.Lambda.Annotations.SourceGenerator.FileIO;
+using Moq;
 using Xunit;
 
 namespace Amazon.Lambda.Annotations.SourceGenerators.Tests
 {
     public class CloudFormationTemplateFinderTests
     {
+        private readonly Mock<IDiagnosticReporter> _mockDiagnosticReporter = new Mock<IDiagnosticReporter>();
         [Fact]
         public void DetermineProjectRootDirectoryTest()
         {
             // ARRANGE
             var tempDir = Path.Combine(Path.GetTempPath(), GetRandomDirectoryName());
             CreateCustomerApplication(tempDir);
-            var templateFinder = new CloudFormationTemplateFinder(new FileManager(), new DirectoryManager());
+            var templateFinder = new CloudFormationTemplateFinder(new FileManager(), new DirectoryManager(), _mockDiagnosticReporter.Object);
 
             // ACT and ASSERT
             var expectedRoot = Path.Combine(tempDir, "Codebase", "Src", "MyServerlessApp");
@@ -24,14 +27,14 @@ namespace Amazon.Lambda.Annotations.SourceGenerators.Tests
             Assert.Equal(expectedRoot, templateFinder.DetermineProjectRootDirectory(Path.Combine(expectedRoot, "Program.cs")));
             Assert.Equal(expectedRoot, templateFinder.DetermineProjectRootDirectory(Path.Combine(expectedRoot, "MyServerlessApp.csproj")));
         }
-        
+
         [Fact]
         public void FindTemplateWithoutDefaultConfigFile()
         {
             // ARRANGE
             var tempDir = Path.Combine(Path.GetTempPath(), GetRandomDirectoryName());
             CreateCustomerApplication(tempDir);
-            var templateFinder = new CloudFormationTemplateFinder(new FileManager(), new DirectoryManager());
+            var templateFinder = new CloudFormationTemplateFinder(new FileManager(), new DirectoryManager(), _mockDiagnosticReporter.Object);
             var projectRootDirectory = Path.Combine(tempDir, "Codebase", "Src", "MyServerlessApp");
 
             // ACT
@@ -42,7 +45,7 @@ namespace Amazon.Lambda.Annotations.SourceGenerators.Tests
             Assert.Equal(expectedPath, templatePath);
             Assert.True(File.Exists(templatePath));
         }
-        
+
         [Fact]
         public void FindTemplateFromDefaultConfigFile()
         {
@@ -65,7 +68,7 @@ namespace Amazon.Lambda.Annotations.SourceGenerators.Tests
 
             var tempDir = Path.Combine(Path.GetTempPath(), GetRandomDirectoryName());
             CreateCustomerApplication(tempDir);
-            var templateFinder = new CloudFormationTemplateFinder(new FileManager(), new DirectoryManager());
+            var templateFinder = new CloudFormationTemplateFinder(new FileManager(), new DirectoryManager(), _mockDiagnosticReporter.Object);
             var projectRootDirectory = Path.Combine(tempDir, "Codebase", "Src", "MyServerlessApp");
             CreateFile(Path.Combine(projectRootDirectory, "Configurations", "aws-lambda-tools-defaults.json"));
             File.WriteAllText(Path.Combine(projectRootDirectory, "Configurations", "aws-lambda-tools-defaults.json"), content);
@@ -78,7 +81,7 @@ namespace Amazon.Lambda.Annotations.SourceGenerators.Tests
             Assert.Equal(expectedPath, templatePath);
             Assert.True(File.Exists(templatePath));
         }
-        
+
         [Fact]
         public void FindTemplatePathWhenDefaultConfigFileDoesNotHaveTemplateProperty()
         {
@@ -99,7 +102,7 @@ namespace Amazon.Lambda.Annotations.SourceGenerators.Tests
 
             var tempDir = Path.Combine(Path.GetTempPath(), GetRandomDirectoryName());
             CreateCustomerApplication(tempDir);
-            var templateFinder = new CloudFormationTemplateFinder(new FileManager(), new DirectoryManager());
+            var templateFinder = new CloudFormationTemplateFinder(new FileManager(), new DirectoryManager(), _mockDiagnosticReporter.Object) ;
             var projectRootDirectory = Path.Combine(tempDir, "Codebase", "Src", "MyServerlessApp");
             CreateFile(Path.Combine(projectRootDirectory, "Configurations", "aws-lambda-tools-defaults.json"));
             File.WriteAllText(Path.Combine(projectRootDirectory, "Configurations", "aws-lambda-tools-defaults.json"), content);
@@ -112,7 +115,7 @@ namespace Amazon.Lambda.Annotations.SourceGenerators.Tests
             Assert.Equal(expectedPath, templatePath);
             Assert.True(File.Exists(templatePath));
         }
-        
+
         private void CreateCustomerApplication(string tempDir)
         {
             var projectRoot = Path.Combine(tempDir, "Codebase", "Src", "MyServerlessApp");

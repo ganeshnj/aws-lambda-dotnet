@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
+using Amazon.Lambda.Annotations.SourceGenerator.Diagnostics;
 using Amazon.Lambda.Annotations.SourceGenerator.FileIO;
+using Microsoft.CodeAnalysis;
 using Newtonsoft.Json.Linq;
 
 namespace Amazon.Lambda.Annotations.SourceGenerator
@@ -10,11 +12,13 @@ namespace Amazon.Lambda.Annotations.SourceGenerator
     {
         private readonly IFileManager _fileManager;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IDiagnosticReporter _diagnosticReporter;
 
-        public CloudFormationTemplateFinder(IFileManager fileManager, IDirectoryManager directoryManager)
+        public CloudFormationTemplateFinder(IFileManager fileManager, IDirectoryManager directoryManager, IDiagnosticReporter diagnosticReporter)
         {
             _fileManager = fileManager;
             _directoryManager = directoryManager;
+            _diagnosticReporter = diagnosticReporter;
         }
 
         public string DetermineProjectRootDirectory(string sourceFilePath)
@@ -36,10 +40,13 @@ namespace Amazon.Lambda.Annotations.SourceGenerator
         public string FindCloudFormationTemplate(string projectRootDirectory)
         {
             if (!_directoryManager.Exists(projectRootDirectory))
-                throw new DirectoryNotFoundException("Failed to find the project root directory");
+            {
+                _diagnosticReporter.Report(Diagnostic.Create(CloudFormationTemplateDescriptors.ProjectRootNotFound, Location.None));
+                throw new DirectoryNotFoundException(string.Format(CloudFormationTemplateDescriptors.ProjectRootNotFound.MessageFormat.ToString(), projectRootDirectory));
+            }
 
             var templateAbsolutePath = string.Empty;
-            
+
             var defaultConfigFile = _directoryManager.GetFiles(projectRootDirectory, "aws-lambda-tools-defaults.json", SearchOption.AllDirectories)
                 .FirstOrDefault();
 
@@ -48,13 +55,13 @@ namespace Amazon.Lambda.Annotations.SourceGenerator
                 templateAbsolutePath = GetTemplatePathFromDefaultConfigFile(defaultConfigFile);
 
             // if the default config file does not exist or if the template property is not found in the default config file
-            // set the template path inside the project root directory. 
+            // set the template path inside the project root directory.
             if (string.IsNullOrEmpty(templateAbsolutePath))
                 templateAbsolutePath = Path.Combine(projectRootDirectory, "serverless.template");
-                
+
             if (!_fileManager.Exists(templateAbsolutePath))
                 _fileManager.Create(templateAbsolutePath).Close();
-            
+
             return templateAbsolutePath;
         }
 
@@ -67,11 +74,11 @@ namespace Amazon.Lambda.Annotations.SourceGenerator
             }
             catch (Exception)
             {
-                return string.Empty;    
+                return string.Empty;
             }
-            
+
             var templateRelativePath = rootToken["template"]?.ToObject<string>();
-            
+
             if (string.IsNullOrEmpty(templateRelativePath))
                 return string.Empty;
 

@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Linq;
 using System.Text;
+using Amazon.Lambda.Annotations.SourceGenerator.Diagnostics;
 using Amazon.Lambda.Annotations.SourceGenerator.FileIO;
 using Amazon.Lambda.Annotations.SourceGenerator.Models;
 using Amazon.Lambda.Annotations.SourceGenerator.Templates;
@@ -24,6 +26,8 @@ namespace Amazon.Lambda.Annotations.SourceGenerator
 
         public void Execute(GeneratorExecutionContext context)
         {
+            var diagnosticReporter = new DiagnosticReporter(context);
+
             // retrieve the populated receiver
             if (!(context.SyntaxContextReceiver is SyntaxReceiver receiver))
             {
@@ -31,10 +35,20 @@ namespace Amazon.Lambda.Annotations.SourceGenerator
             }
 
             var semanticModelProvider = new SemanticModelProvider(context);
-            var configureMethodModel = semanticModelProvider.GetConfigureMethodModel(receiver.StartupClass);
+            if (receiver.StartupClasses.Count > 1)
+            {
+                foreach (var startup in receiver.StartupClasses)
+                {
+                    diagnosticReporter.Report(Diagnostic.Create(CSharpGeneratorDescriptors.MultipleStartupNotAllowed,
+                        Location.Create(startup.SyntaxTree, startup.Span),
+                        startup.SyntaxTree.FilePath));
+                }
+            }
+
+            var configureMethodModel = semanticModelProvider.GetConfigureMethodModel(receiver.StartupClasses.FirstOrDefault());
 
             var annotationReport = new AnnotationReport();
-            var templateFinder = new CloudFormationTemplateFinder(new FileManager(), new DirectoryManager());
+            var templateFinder = new CloudFormationTemplateFinder(new FileManager(), new DirectoryManager(), diagnosticReporter);
             var projectRootDirectory = string.Empty;
 
             foreach (var lambdaMethod in receiver.LambdaMethods)
