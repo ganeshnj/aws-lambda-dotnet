@@ -2,7 +2,7 @@ name: Update Dockerfiles
 
 on:
   schedule:
-    # Allows to Run every day at 9:00 am
+    # Allows to Run every day at 9:00 am PST
     - cron:  '0 17 * * *'
 
   # Allows to run this workflow manually from the Actions tab
