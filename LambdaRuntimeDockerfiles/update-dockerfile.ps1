@@ -2,15 +2,15 @@ param ([Parameter(Mandatory)]$Dockerfile)
 
 $ErrorActionPreference = "Suspend"
 
-# Updates the Dockerfile with next ASP.NET Core version and sha256 hash if available
+# Updates the Dockerfile with next ASP.NET Core version and checksum256 hash if available
 function Update-Dockerfile ([string]$path) {
     $nextVersion = Get-NextASPNETVersion -Dockerfile $path
 
-    $shaFilePath = "${nextVersion}-sha.txt"
+    $checksumFilePath = "${nextVersion}-checksum.txt"
 
-    $sha512Uri = "https://dotnetcli.blob.core.windows.net/dotnet/checksums/${nextVersion}-sha.txt"
+    $checksumUri = "https://dotnetcli.blob.core.windows.net/dotnet/checksums/${nextVersion}-checksum.txt"
 
-    Invoke-WebRequest -Uri $sha512Uri -OutFile $shaFilePath
+    Invoke-WebRequest -Uri $checksumUri -OutFile $checksumFilePath
     if (!$?) {
         Write-Host "Failed to download checksums for ${nextVersion}. ${nextVersion} is not available yet."
         return
@@ -19,24 +19,24 @@ function Update-Dockerfile ([string]$path) {
     $arch = Get-Architecture -Dockerfile $path
 
     $artifact = "aspnetcore-runtime-${nextVersion}-linux-${arch}.tar.gz"
-    $sha512 = Get-SHA512 -Artifact $artifact -Path $shaFilePath
+    $checksum = Get-Checksum -Artifact $artifact -Path $checksumFilePath
 
-    (Get-Content $path) -replace 'ARG ASPNET_VERSION=.*', "ARG ASPNET_VERSION=${nextVersion}" -replace 'ASPNET_SHA512=.*', $sha512 | Out-File $path
+    (Get-Content $path) -replace 'ARG ASPNET_VERSION=.*', "ARG ASPNET_VERSION=${nextVersion}" -replace 'ASPNET_Checksum=.*', $checksum | Out-File $path
 
     Write-Host "Updated ${path} to ${nextVersion}."
 
-    # This allows sharing the $path variable between steps
+    # This allows checksumring the $path variable between steps
     # which is needed to update the description of the PR
-    Write-Host "::set-output name=${path}::- Updated ${path} to ${nextVersion}.<br> - Artifact: ${artifact}<br> - SHA512 Source: ${sha512Uri}"
+    Write-Host "::set-output name=${path}::- Updated ${path} to ${nextVersion}<br> - Artifact: ${artifact}<br> - Checksum Source: ${checksumUri}"
 }
 
-# Returns SHA512 of given ASP.NET Core version from the give SHA512 file
-function Get-SHA512 ([string]$artifact, [string]$path) {
+# Returns Checksum of given ASP.NET Core version from the give Checksum file
+function Get-Checksum ([string]$artifact, [string]$path) {
     $line = Select-String -Path $path -Pattern $artifact | Select-Object -Property Line -ExpandProperty Line
     Write-Host $line
 
-    $sha512 = $line.Split(" ")[0]
-    return $sha512
+    $checksum = $line.Split(" ")[0]
+    return $checksum
 }
 
 function Get-Architecture ([string]$Dockerfile) {
