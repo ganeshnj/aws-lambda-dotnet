@@ -1,6 +1,6 @@
 # Based on Docker image from: https://github.com/dotnet/dotnet-docker/
 
-ARG ASPNET_VERSION=6.0.0
+ARG ASPNET_VERSION=6.0.1
 ARG ASPNET_SHA512=6a1ae878efdc9f654e1914b0753b710c3780b646ac160fb5a68850b2fd1101675dc71e015dbbea6b4fcf1edac0822d3f7d470e9ed533dd81d0cfbcbbb1745c6c
 
 ARG LAMBDA_RUNTIME_NAME=dotnet6
