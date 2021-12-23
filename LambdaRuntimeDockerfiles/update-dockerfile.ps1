@@ -11,7 +11,7 @@ function Update-Dockerfile ([string]$path) {
     $checksumFilePath = "${nextVersion}-checksum.txt"
 
     $checksumUri = "https://dotnetcli.blob.core.windows.net/dotnet/checksums/${nextVersion}-sha.txt"
-
+    Write-Host "Downloading checksume source from $checksumUri"
     Invoke-WebRequest -Uri $checksumUri -OutFile $checksumFilePath
     if (!$?) {
         Write-Host "Failed to download checksums for ${nextVersion}. ${nextVersion} is not available yet."
