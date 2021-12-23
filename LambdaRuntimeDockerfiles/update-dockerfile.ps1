@@ -27,7 +27,7 @@ function Update-Dockerfile ([string]$path) {
 
     # This allows sharing the $path variable between steps
     # which is needed to update the description of the PR
-    Write-Host "::set-output name=${path}::Updated ${path} to ${nextVersion}. Artifact: ${artifact}, SHA512 Source: ${sha512Uri}"
+    Write-Host "::set-output name=${path}::- Updated ${path} to ${nextVersion}.\n\t - Artifact: ${artifact}\n\t -SHA512 Source: ${sha512Uri}"
 }
 
 # Returns SHA512 of given ASP.NET Core version from the give SHA512 file
