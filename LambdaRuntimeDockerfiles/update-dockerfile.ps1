@@ -4,6 +4,8 @@ $ErrorActionPreference = "Stop"
 
 # Updates the Dockerfile with next ASP.NET Core version and checksum256 hash if available
 function Update-Dockerfile ([string]$path) {
+    Write-Host "Updating $path with next ASP.NET Core version"
+
     $nextVersion = Get-NextASPNETVersion -Dockerfile $path
 
     $checksumFilePath = "${nextVersion}-checksum.txt"
