@@ -36,7 +36,7 @@ jobs:
           .\LambdaRuntimeDockerfiles/update-dockerfile.ps1 -Dockerfile ${{ env.NET_6_ARM64_Dockerfile }}
           # if there are not any changes, the script will exit with status code 0
           git diff --exit-code "**/*Dockerfile"
-          if ($? -eq $false) { return 0 }
+          if ($? -eq $true) { return 0 }
           # commit and push changes
           git config --global user.email "github-aws-sdk-dotnet-automation@amazon.com"
           git config --global user.name "aws-sdk-dotnet-automation"
