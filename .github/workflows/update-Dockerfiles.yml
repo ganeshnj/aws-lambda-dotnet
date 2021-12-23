@@ -56,9 +56,6 @@ jobs:
           source_branch: ${{ steps.commit-push.outputs.BRANCH }}
           destination_branch: "master"
           pr_title: 'chore: ASP.NET Core version update in Dockerfiles'
-          pr_body: "This PR updates the Dockerfiles to use the latest ASP.NET Core version.
-            ${{ steps.update-dockerfiles.outputs.NET_5_AMD64_Dockerfile }}
-            ${{ steps.update-dockerfiles.outputs.NET_6_AMD64_Dockerfile }}
-            ${{ steps.update-dockerfiles.outputs.NET_6_ARM64_Dockerfile }}"
+          pr_body: "This PR updates the Dockerfiles to use the latest ASP.NET Core version. ${{ steps.update-dockerfiles.outputs.NET_5_AMD64_Dockerfile }} ${{ steps.update-dockerfiles.outputs.NET_6_AMD64_Dockerfile }} ${{ steps.update-dockerfiles.outputs.NET_6_ARM64_Dockerfile }}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pr_label: "auto-pr"
