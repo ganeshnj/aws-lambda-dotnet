@@ -35,7 +35,7 @@ jobs:
           .\LambdaRuntimeDockerfiles/update-dockerfile.ps1 -Dockerfile ${{ env.NET_6_AMD64_Dockerfile }}
           .\LambdaRuntimeDockerfiles/update-dockerfile.ps1 -Dockerfile ${{ env.NET_6_ARM64_Dockerfile }}
           git diff --exit-code "**/*Dockerfile"
-          Write-Host "::set-output name=DIFF::$?"
+          Write-Host "::set-output name=DIFF::{$?}"
 
       # Push the updated Dockerfiles to the repository
       - name: Commit and Push
@@ -49,7 +49,7 @@ jobs:
           git commit -m "chore: ASP.NET Core version update in Dockerfiles"
           git push origin $branch
           echo "::set-output name=BRANCH::$branch"
-        if: ${{ steps.update-dockerfiles.outputs.DIFF }} == 'True'
+        if: ${{ steps.update-dockerfiles.outputs.DIFF }} == 'False'
 
       # Create a Pull Request from the pushed branch
       - name: Pull Request
@@ -62,4 +62,4 @@ jobs:
           pr_body: "This PR updates the Dockerfiles to use the latest ASP.NET Core version. Verify listed Dockerfiles that they have correct version and matching SHA256 checksum for ASP.NET Core runtime. \n\nAll .NET versions https://dotnet.microsoft.com/en-us/download/dotnet\n\n*Description of changes:*\n${{join(steps.update-dockerfiles.outputs.*, '\n')}}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pr_label: "auto-pr"
-        if: ${{ steps.update-dockerfiles.outputs.DIFF }} == 'True'
+        if: ${{ steps.update-dockerfiles.outputs.DIFF }} == 'False'
