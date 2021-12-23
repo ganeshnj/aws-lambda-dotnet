@@ -40,7 +40,8 @@ jobs:
           # commit and push changes
           git config --global user.email "github-aws-sdk-dotnet-automation@amazon.com"
           git config --global user.name "aws-sdk-dotnet-automation"
-          branch=chore/update-Dockerfiles-$(date +'%Y-%m-%dT%H-%M-%S')
+          $suffix=Get-Date -Format yyyy-mm-dd-HH-mm
+          $branch=chore/update-Dockerfiles-${suffix}
           git checkout -b $branch
           git add "**/*Dockerfile"
           git commit -m "chore: ASP.NET Core version update in Dockerfiles"
