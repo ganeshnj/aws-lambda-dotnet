@@ -34,15 +34,10 @@ jobs:
           .\LambdaRuntimeDockerfiles/update-dockerfile.ps1 -Dockerfile ${{ env.NET_5_AMD64_Dockerfile }}
           .\LambdaRuntimeDockerfiles/update-dockerfile.ps1 -Dockerfile ${{ env.NET_6_AMD64_Dockerfile }}
           .\LambdaRuntimeDockerfiles/update-dockerfile.ps1 -Dockerfile ${{ env.NET_6_ARM64_Dockerfile }}
+          # if there are not any changes, the script will exit with status code 0
           git diff --exit-code "**/*Dockerfile"
-          Write-Host "::set-output name=DIFF::$?"
-
-      # Push the updated Dockerfiles to the repository
-      - name: Commit and Push
-        id: commit-push
-        if: ${{ steps.update-dockerfiles.outputs.DIFF }} == 'False' # git diff returns True if there are changes
-        run: |
-          echo ${{join(steps.update-dockerfiles.outputs.*, '\n')}}
+          if ($? -eq $False) { exit 0 }
+          # commit and push changes
           git config --global user.email "github-aws-sdk-dotnet-automation@amazon.com"
           git config --global user.name "aws-sdk-dotnet-automation"
           branch=chore/update-Dockerfiles-$(date +'%Y-%m-%dT%H-%M-%S')
@@ -55,10 +50,10 @@ jobs:
       # Create a Pull Request from the pushed branch
       - name: Pull Request
         id: pull-request
-        if: ${{ steps.update-dockerfiles.outputs.DIFF }} == 'False' # git diff returns True if there are changes
+        if: git show-branch remotes/origin/${{ steps.update-dockerfiles.outputs.BRANCH }} == '1'
         uses: repo-sync/pull-request@v2
         with:
-          source_branch: ${{ steps.commit-push.outputs.BRANCH }}
+          source_branch: ${{ steps.update-dockerfiles.outputs.BRANCH }}
           destination_branch: "master"
           pr_title: 'chore: ASP.NET Core version update in Dockerfiles'
           pr_body: "This PR updates the Dockerfiles to use the latest ASP.NET Core version. Verify listed Dockerfiles that they have correct version and matching SHA256 checksum for ASP.NET Core runtime. \n\nAll .NET versions https://dotnet.microsoft.com/en-us/download/dotnet\n\n*Description of changes:*\n${{join(steps.update-dockerfiles.outputs.*, '\n')}}"
