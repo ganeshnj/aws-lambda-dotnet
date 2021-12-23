@@ -36,7 +36,7 @@ jobs:
           .\LambdaRuntimeDockerfiles/update-dockerfile.ps1 -Dockerfile ${{ env.NET_6_ARM64_Dockerfile }}
           # if there are not any changes, the script will exit with status code 0
           git diff --exit-code "**/*Dockerfile"
-          if ($? -eq $true) { return 0 }
+          if ($? -eq $true) { return }
           # commit and push changes
           git config --global user.email "github-aws-sdk-dotnet-automation@amazon.com"
           git config --global user.name "aws-sdk-dotnet-automation"
@@ -51,7 +51,7 @@ jobs:
       # Create a Pull Request from the pushed branch
       - name: Pull Request
         id: pull-request
-        if: git show-branch remotes/origin/${{ steps.update-dockerfiles.outputs.BRANCH }} == '1'
+        if: ${{ steps.update-dockerfiles.outputs.BRANCH }}
         uses: repo-sync/pull-request@v2
         with:
           source_branch: ${{ steps.update-dockerfiles.outputs.BRANCH }}
