@@ -23,7 +23,7 @@ function Update-Dockerfile ([string]$path) {
     $artifact = "aspnetcore-runtime-${nextVersion}-linux-${arch}.tar.gz"
     $checksum = Get-Checksum -Artifact $artifact -Path $checksumFilePath
 
-    (Get-Content $path) -replace 'ARG ASPNET_VERSION=.*', "ARG ASPNET_VERSION=${nextVersion}" -replace 'ASPNET_Checksum=.*', $checksum | Out-File $path
+    (Get-Content $path) -replace 'ARG ASPNET_VERSION=.*', "ARG ASPNET_VERSION=${nextVersion}" -replace 'ARG ASPNET_SHA512=.*', "ARG ASPNET_SHA512=${checksum}" | Out-File $path
 
     Write-Host "Updated ${path} to ${nextVersion}."
 
