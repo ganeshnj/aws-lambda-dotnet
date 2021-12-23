@@ -40,8 +40,9 @@ jobs:
       # Push the updated Dockerfiles to the repository
       - name: Commit and Push
         id: commit-push
-        if: ${{ steps.update-dockerfiles.outputs.DIFF }} == 'False'
+        if: ${{ steps.update-dockerfiles.outputs.DIFF }} == 'False' # git diff returns True if there are changes
         run: |
+          echo ${{join(steps.update-dockerfiles.outputs.*, '\n')}}
           git config --global user.email "github-aws-sdk-dotnet-automation@amazon.com"
           git config --global user.name "aws-sdk-dotnet-automation"
           branch=chore/update-Dockerfiles-$(date +'%Y-%m-%dT%H-%M-%S')
@@ -54,7 +55,7 @@ jobs:
       # Create a Pull Request from the pushed branch
       - name: Pull Request
         id: pull-request
-        if: ${{ steps.update-dockerfiles.outputs.DIFF }} == 'False'
+        if: ${{ steps.update-dockerfiles.outputs.DIFF }} == 'False' # git diff returns True if there are changes
         uses: repo-sync/pull-request@v2
         with:
           source_branch: ${{ steps.commit-push.outputs.BRANCH }}
