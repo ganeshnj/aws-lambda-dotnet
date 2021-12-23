@@ -58,6 +58,6 @@ jobs:
           source_branch: ${{ steps.commit-push.outputs.BRANCH }}
           destination_branch: "master"
           pr_title: 'chore: ASP.NET Core version update in Dockerfiles'
-          pr_body: "This PR updates the Dockerfiles to use the latest ASP.NET Core version. Verify listed Dockerfiles that they have correct version and matching SHA256 checksum for ASP.NET Core runtime. \n\nAll .NET versions https://dotnet.microsoft.com/en-us/download/dotnet\nDescription of changes: \n\n${{join(steps.update-dockerfiles.outputs.*, '\n')}}"
+          pr_body: "This PR updates the Dockerfiles to use the latest ASP.NET Core version. Verify listed Dockerfiles that they have correct version and matching SHA256 checksum for ASP.NET Core runtime. \n\nAll .NET versions https://dotnet.microsoft.com/en-us/download/dotnet\n\n*Description of changes:*\n${{join(steps.update-dockerfiles.outputs.*, '\n')}}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pr_label: "auto-pr"
