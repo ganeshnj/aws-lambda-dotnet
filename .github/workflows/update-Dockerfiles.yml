@@ -34,7 +34,7 @@ jobs:
           .\LambdaRuntimeDockerfiles/update-dockerfile.ps1 -Dockerfile ${{ env.NET_5_AMD64_Dockerfile }}
           .\LambdaRuntimeDockerfiles/update-dockerfile.ps1 -Dockerfile ${{ env.NET_6_AMD64_Dockerfile }}
           .\LambdaRuntimeDockerfiles/update-dockerfile.ps1 -Dockerfile ${{ env.NET_6_ARM64_Dockerfile }}
-          git diff --exit-code --no-pager "**/*Dockerfile"
+          git diff --exit-code "**/*Dockerfile"
           Write-Host "::set-output name=DIFF::$?"
 
       # Push the updated Dockerfiles to the repository
