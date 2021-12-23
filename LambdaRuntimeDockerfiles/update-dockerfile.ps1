@@ -8,7 +8,7 @@ function Update-Dockerfile ([string]$path) {
 
     $checksumFilePath = "${nextVersion}-checksum.txt"
 
-    $checksumUri = "https://dotnetcli.blob.core.windows.net/dotnet/checksums/${nextVersion}-checksum.txt"
+    $checksumUri = "https://dotnetcli.blob.core.windows.net/dotnet/checksums/${nextVersion}-sha.txt"
 
     Invoke-WebRequest -Uri $checksumUri -OutFile $checksumFilePath
     if (!$?) {
