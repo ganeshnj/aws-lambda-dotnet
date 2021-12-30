@@ -87,8 +87,10 @@ jobs:
             Verify listed Dockerfiles that they have correct version and matching SHA256 checksum for ASP.NET Core runtime.
             \n\nAll .NET versions https://dotnet.microsoft.com/en-us/download/dotnet
             \n\n*Description of changes:*
-            \n${{join(steps.update-net5-amd64.outputs.*, '\n')}}"
-            \n${{join(steps.update-net6-amd64.outputs.*, '\n')}}"
-            \n${{join(steps.update-net6-arm64.outputs.*, '\n')}}"
+            ${{
+              join(steps.update-net5-amd64.outputs.*, '\n') \n
+              join(steps.update-net6-amd64.outputs.*, '\n') \n
+              join(steps.update-net6-arm64.outputs.*, '\n')
+            }}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pr_label: "auto-pr"
