@@ -1,12 +1,24 @@
 name: Update Dockerfiles
 
 on:
-  schedule:
-    # Allows to Run every day at 9:00 am PST
-    - cron:  '0 17 * * *'
-
   # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      NET_5_AMD64:
+        description: ".NET 5 AMD64"
+        type: boolean
+        required: true
+        default: "true"
+      NET_6_AMD64:
+        description: ".NET 6 AMD64"
+        type: boolean
+        required: true
+        default: "true"
+      NET_6_ARM64:
+        description: ".NET 6 ARM64"
+        type: boolean
+        required: true
+        default: "true"
 
   # Allows to run this workflow on script updates
   pull_request:
